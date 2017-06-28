@@ -8,11 +8,11 @@ class TemplateManager
             throw new \RuntimeException('no tpl given');
         }
 
-        $replaced = clone($tpl);
-        $replaced->subject = $this->computeText($replaced->subject, $data);
-        $replaced->content = $this->computeText($replaced->content, $data);
+        $textReplaced = clone($tpl);
+        $textReplaced->subject = $this->computeText($textReplaced->subject, $data);
+        $textReplaced->content = $this->computeText($textReplaced->content, $data);
 
-        return $replaced;
+        return $textReplaced;
     }
 
     private function computeText($text, array $data)
@@ -23,39 +23,39 @@ class TemplateManager
 
         if ($quote)
         {
-            $_quoteFromRepository = QuoteRepository::getInstance()->getById($quote->id);
-            $usefulObject = SiteRepository::getInstance()->getById($quote->siteId);
-            $destinationOfQuote = DestinationRepository::getInstance()->getById($quote->destinationId);
+            $quoteFromRepo  = QuoteRepository::getInstance()->getById($quote->id);
+            $site           = SiteRepository::getInstance()->getById($quote->siteId);
+            $destination    = DestinationRepository::getInstance()->getById($quote->destinationId);
 
             if(strpos($text, '[quote:destination_link]') !== false){
                 $destination = DestinationRepository::getInstance()->getById($quote->destinationId);
             }
 
-            $containsSummaryHtml = strpos($text, '[quote:summary_html]');
-            $containsSummary     = strpos($text, '[quote:summary]');
+            $summaryHtml = strpos($text, '[quote:summary_html]');
+            $summary     = strpos($text, '[quote:summary]');
 
-            if ($containsSummaryHtml !== false || $containsSummary !== false) {
-                if ($containsSummaryHtml !== false) {
+            if ($summaryHtml !== false || $summary !== false) {
+                if ($summaryHtml !== false) {
                     $text = str_replace(
                         '[quote:summary_html]',
-                        Quote::renderHtml($_quoteFromRepository),
+                        Quote::renderHtml($quoteFromRepo),
                         $text
                     );
                 }
-                if ($containsSummary !== false) {
+                if ($summary !== false) {
                     $text = str_replace(
                         '[quote:summary]',
-                        Quote::renderText($_quoteFromRepository),
+                        Quote::renderText($quoteFromRepo),
                         $text
                     );
                 }
             }
 
-            (strpos($text, '[quote:destination_name]') !== false) and $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
+            (strpos($text, '[quote:destination_name]') !== false) and $text = str_replace('[quote:destination_name]', $destination->countryName, $text);
         }
 
         if (isset($destination))
-            $text = str_replace('[quote:destination_link]', $usefulObject->url . '/' . $destination->countryName . '/quote/' . $_quoteFromRepository->id, $text);
+            $text = str_replace('[quote:destination_link]', $site->url . '/' . $destination->countryName . '/quote/' . $quoteFromRepo->id, $text);
         else
             $text = str_replace('[quote:destination_link]', '', $text);
 
@@ -63,11 +63,12 @@ class TemplateManager
          * USER
          * [user:*]
          */
-        $_user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
-        if($_user) {
-            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(mb_strtolower($_user->firstname)), $text);
+        $user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
+        if($user) {
+            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]', ucfirst(mb_strtolower($user->firstname)), $text);
         }
 
         return $text;
     }
+
 }
