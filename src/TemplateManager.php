@@ -50,7 +50,7 @@ class TemplateManager
                 $replacements['[quote:destination_name]'] = $destination->countryName;
 
             if(strpos($text, '[quote:destination_link]'))
-                $replacements['[quote:destination_link]'] = $site->url . '/' . $destination->countryName . '/quote/' . $quoteFromRepo->id;
+                $replacements['[quote:destination_link]'] = $destination ? $site->url . '/' . $destination->countryName . '/quote/' . $quoteFromRepo->id : '';
 
             if(strpos($text, '[quote:summary_html]'))
                 $replacements['[quote:summary_html]'] = Quote::renderHtml($quoteFromRepo);
