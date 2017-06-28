@@ -23,41 +23,42 @@ class TemplateManager
 
         if ($quote)
         {
+
             $quoteFromRepo  = QuoteRepository::getInstance()->getById($quote->id);
             $site           = SiteRepository::getInstance()->getById($quote->siteId);
             $destination    = DestinationRepository::getInstance()->getById($quote->destinationId);
 
-            if(strpos($text, '[quote:destination_link]') !== false){
-                $destination = DestinationRepository::getInstance()->getById($quote->destinationId);
-            }
+            // ----- AJOUTER LES NOUVELLES BALISES A REMPLACER ICI -----
 
-            $summaryHtml = strpos($text, '[quote:summary_html]');
-            $summary     = strpos($text, '[quote:summary]');
+            $replacement = array();
 
-            if ($summaryHtml !== false || $summary !== false) {
-                if ($summaryHtml !== false) {
-                    $text = str_replace(
-                        '[quote:summary_html]',
-                        Quote::renderHtml($quoteFromRepo),
-                        $text
-                    );
-                }
-                if ($summary !== false) {
-                    $text = str_replace(
-                        '[quote:summary]',
-                        Quote::renderText($quoteFromRepo),
-                        $text
-                    );
-                }
-            }
+            if(strpos($text, '[quote:destination_name]'))
+                $replacement['[quote:destination_name]'] = $destination->countryName;
 
-            (strpos($text, '[quote:destination_name]') !== false) and $text = str_replace('[quote:destination_name]', $destination->countryName, $text);
+            if(strpos($text, '[quote:destination_link]'))
+                $replacement['[quote:destination_link]'] = $site->url . '/' . $destination->countryName . '/quote/' . $quoteFromRepo->id;
+
+            if(strpos($text, '[quote:summary_html]'))
+                $replacement['[quote:summary_html]'] = Quote::renderHtml($quoteFromRepo);
+
+            if(strpos($text, '[quote:summary]'))
+                $replacement['[quote:summary]'] = Quote::renderText($quoteFromRepo);
+
+
+            /* Ne pas faire de strpos pourrait être plus avantageux si les chances que les balises ne se trouvent pas dans le template sont faibles.
+
+            $replacement = array ()
+                '[quote:destination_name]'  => $destination->countryName,
+                '[quote:destination_link]'  => $site->url . '/' . $destination->countryName . '/quote/' . $quoteFromRepo->id,
+                '[quote:summary_html]'      => Quote::renderHtml($quoteFromRepo),
+                '[quote:summary]'           => Quote::renderText($quoteFromRepo)
+            );
+
+            */
+
+            $text = str_replace(array_keys($replacement), $replacement, $text);
+
         }
-
-        if (isset($destination))
-            $text = str_replace('[quote:destination_link]', $site->url . '/' . $destination->countryName . '/quote/' . $quoteFromRepo->id, $text);
-        else
-            $text = str_replace('[quote:destination_link]', '', $text);
 
         /*
          * USER
