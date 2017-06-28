@@ -17,7 +17,10 @@ class TemplateManager
 
     private function computeText($text, array $data)
     {
+        
         $APPLICATION_CONTEXT = ApplicationContext::getInstance();
+
+        // REPLACE QUOTE PLACEHOLDERS
 
         $quote = (isset($data['quote']) and $data['quote'] instanceof Quote) ? $data['quote'] : null;
 
@@ -28,7 +31,7 @@ class TemplateManager
             $site           = SiteRepository::getInstance()->getById($quote->siteId);
             $destination    = DestinationRepository::getInstance()->getById($quote->destinationId);
 
-            // ----- AJOUTER LES NOUVELLES BALISES A REMPLACER ICI -----
+            // ----- ADD NEW PLACEHOLDERS TO BE REPLACED HERE -----
 
             $replacement = array();
 
@@ -45,31 +48,34 @@ class TemplateManager
                 $replacement['[quote:summary]'] = Quote::renderText($quoteFromRepo);
 
 
-            /* Ne pas faire de strpos pourrait être plus avantageux si les chances que les balises ne se trouvent pas dans le template sont faibles.
-
-            $replacement = array ()
-                '[quote:destination_name]'  => $destination->countryName,
-                '[quote:destination_link]'  => $site->url . '/' . $destination->countryName . '/quote/' . $quoteFromRepo->id,
-                '[quote:summary_html]'      => Quote::renderHtml($quoteFromRepo),
-                '[quote:summary]'           => Quote::renderText($quoteFromRepo)
-            );
-
-            */
+            // -----------------------------------------------------
 
             $text = str_replace(array_keys($replacement), $replacement, $text);
 
         }
 
-        /*
-         * USER
-         * [user:*]
-         */
+        // REPLACE USER PLACEHOLDERS
+
         $user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
+
         if($user) {
-            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]', ucfirst(mb_strtolower($user->firstname)), $text);
+
+            // ----- ADD NEW PLACEHOLDERS TO BE REPLACED HERE -----
+
+            $replacement = array();
+
+            if(strpos($text, '[user:first_name]'))
+                $replacement['[user:first_name]'] = ucfirst(mb_strtolower($user->firstname));
+
+         
+            // -----------------------------------------------------
+
+            $text = str_replace(array_keys($replacement), $replacement, $text);
+
         }
 
         return $text;
+
     }
 
 }
