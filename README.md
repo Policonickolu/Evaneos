@@ -40,3 +40,12 @@ What do we expect from you:
  - a file / message / email explaining your process and principles you've followed
 
 **Good luck!**
+
+_______________________
+
+Message d'explications :
+
+- J'ai renommé les variables qui n'avaient pas la même cohérence pour le nommage (emploi de verbes, etc.).
+- J'ai cherché les conditions superflues comme au niveau du "$containsSummaryHTML", globalement la façon de vérifier l'existence d'une balise n'était jamais la même et rendait le tout illisible.
+- J'ai fait préparer les remplacements de balises à l'avance et de la même façon pour ensuite tout remplacer par un seul appel à la fonction str_replace. En factorisant le code, cela rend l'ajout de nouvelles balises plus simple.
+- J'ai séparé la fonction longue en 3 fonctions plus courtes et lisibles.
